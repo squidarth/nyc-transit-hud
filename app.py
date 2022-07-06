@@ -6,11 +6,11 @@ from email.policy import default
 from operator import delitem
 from time import time
 from collections import defaultdict
-from flask import Flask
+from flask import Flask, send_from_directory
 from google.transit import gtfs_realtime_pb2
 from typing import List
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='', static_folder='webapp/build')
 
 routes_mapping = {}
 with open("routes.txt") as routes_csv:
@@ -50,6 +50,11 @@ endpoints = [
     "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw",
     "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
 ]
+
+
+@app.route("/")
+def index():
+    return send_from_directory(app.static_folder,'index.html')
 
 @app.route("/arrivals")
 def arrivals():
