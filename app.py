@@ -7,10 +7,12 @@ from operator import delitem
 from time import time
 from collections import defaultdict
 from flask import Flask, send_from_directory
+from flask_cors import CORS
 from google.transit import gtfs_realtime_pb2
 from typing import List
 
 app = Flask(__name__, static_url_path='', static_folder='webapp/build')
+CORS(app)
 
 routes_mapping = {}
 with open("routes.txt") as routes_csv:
