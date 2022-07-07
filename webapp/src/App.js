@@ -57,15 +57,26 @@ function App() {
   const [getArrivals, setArrivals] = useState({})
 
   useEffect(()=>{
-    fetch('http://localhost:4333/arrivals').then(response => {
-      console.log("SUCCESS", response)
-      return response.json()
-    }).then(actualData => {
-      console.log(actualData)
-      setArrivals(actualData)
-    }).catch(error => {
-      console.log(error)
-    })
+      fetch('http://localhost:4333/arrivals').then(response => {
+        console.log("SUCCESS", response)
+        return response.json()
+      }).then(actualData => {
+        console.log(actualData)
+        setArrivals(actualData)
+      }).catch(error => {
+        console.log(error)
+      })
+    setInterval(() => {
+      fetch('http://localhost:4333/arrivals').then(response => {
+        console.log("SUCCESS", response)
+        return response.json()
+      }).then(actualData => {
+        console.log(actualData)
+        setArrivals(actualData)
+      }).catch(error => {
+        console.log(error)
+      })
+    }, 5000)
   }, [])
 
   var content = <PendingDisplay></PendingDisplay>
