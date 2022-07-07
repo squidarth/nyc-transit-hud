@@ -23,6 +23,8 @@ function getTrainExtraStyles(train) {
       return {backgroundColor: "green"}
     case "5":
       return {backgroundColor: "green"}
+    default:
+      return {}
 
 
 
@@ -39,7 +41,7 @@ function PendingDisplay() {
 
 function Direction(props) {
   var directionString = ""
-  if (props.direction == "N") {
+  if (props.direction === "N") {
     directionString = "Northbound"
   } else {
     directionString = "Southbound"
