@@ -19,6 +19,12 @@ function getTrainExtraStyles(train) {
       return {backgroundColor: "orange"}
     case "F":
       return {backgroundColor: "orange"}
+    case "4":
+      return {backgroundColor: "green"}
+    case "5":
+      return {backgroundColor: "green"}
+
+
 
   }
 }
