@@ -1,3 +1,4 @@
+import './App.css';
 import React, { useEffect, useState } from 'react';
 
 
@@ -6,6 +7,19 @@ function PendingDisplay() {
     <div>
       Waiting Results...
     </div>
+  )
+}
+
+function Subway(props) {
+  var fullTrainString = props.train;
+
+  var direction = fullTrainString.slice(-1);
+  var train = fullTrainString.slice(0, fullTrainString.length - 1)
+  return (
+    <span>
+      <span class="train-styling">{train}</span>
+      <span>direction: {direction}</span>
+    </span>
   )
 }
 
@@ -24,19 +38,18 @@ function App() {
     })
   }, [])
 
-
-  console.log(getArrivals)
   var content = <PendingDisplay></PendingDisplay>
   if (Object.keys(getArrivals).length !== 0) {
     content = Object.entries(getArrivals).map((item) => {
       // item[0] is the train
       // item[1] is the arrival times
 
-      const arrivals = item[1].map((arrivalTime) => arrivalTime[1]).map((arrivalTime) => <span>{arrivalTime} </span>)
+
+      // arrivalTime[1] in the direction
+      const arrivals = item[1].map((arrivalTime) => <span>{arrivalTime[1]},</span>)
       return <div>
         <span>
-
-          {item[0]} : 
+          <Subway train={item[0]}></Subway>
         </span>
         <span>
 
@@ -48,9 +61,8 @@ function App() {
   }
   return (
     <div className="App">
-
-
       <div>
+          <h2>Next Arrivals</h2>
           {content}
       </div>
     </div>

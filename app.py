@@ -2,14 +2,11 @@ import csv
 import datetime
 import os
 import requests
-from email.policy import default
-from operator import delitem
-from time import time
 from collections import defaultdict
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from google.transit import gtfs_realtime_pb2
-from typing import List
+from typing import List, Tuple
 
 app = Flask(__name__, static_url_path='', static_folder='webapp/build')
 CORS(app)
@@ -33,13 +30,13 @@ def displayable_time(timestamp: datetime.datetime) -> str:
     return (timestamp.strftime("%H:%M:%S")  , str(int((timestamp - datetime.datetime.now()).seconds/60)))
 
 def displayable_route(route: str) -> str:
-    return routes_mapping[route]
+    return routes_mapping[route[:-1]] + route[-1]
 
-def convert_time(provided_ts: int) -> str:
-    return displayable_time(parse_time(provided_ts))
+def convert_time(arrival: int) -> str:
+    return displayable_time(parse_time(arrival))
 
-def convert_times(provided_ts: List[int]) -> List[str]:
-    return [convert_time(ts) for ts in provided_ts ]
+def convert_times(provided_arrivals: List[int]) -> List[str]:
+    return [convert_time(arrival) for arrival in provided_arrivals ]
 
 def is_valid_time(provided_ts: int) -> str:
     return (parse_time(provided_ts) - datetime.datetime.now()).days >= 0 and (parse_time(provided_ts) - datetime.datetime.now()).seconds > 60
@@ -72,7 +69,7 @@ def arrivals():
         # Trip info: entity.trip_update.trip
 
         # All of the stop times: entity.trip_update.stop_time_update 
-        upcoming_arrivals += [(stop_time_update.arrival.time, entity.trip_update.trip.route_id)
+        upcoming_arrivals += [(stop_time_update.arrival.time, stop_time_update.stop_id[-1], entity.trip_update.trip.route_id)
             for entity in feed_json.entity
             for stop_time_update 
             in entity.trip_update.stop_time_update
@@ -83,7 +80,9 @@ def arrivals():
 
     arrivals_by_route = defaultdict(list)
     for arrival in upcoming_arrivals:
-        arrivals_by_route[arrival[1]].append(arrival[0])
+        arrivals_by_route[str(arrival[2]) + str(arrival[1])].append(arrival[0])
+        
+    print(arrivals_by_route.keys())
 
-    next_three_arrivals = dict([(displayable_route(route), convert_times(arrivals[:3])) for route, arrivals in arrivals_by_route.items()])
+    next_three_arrivals = dict([(displayable_route(route), convert_times(sorted(arrivals)[:4])) for route, arrivals in arrivals_by_route.items()])
     return next_three_arrivals

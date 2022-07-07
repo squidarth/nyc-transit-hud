@@ -1,0 +1,11 @@
+.App {
+  margin: 10px 10px 10px 10px;
+}
+
+.train-styling {
+  border-radius: 100%;
+  padding: 5px 8px 5px 8px;
+  background-color: red;
+  color: white;
+  font-family: Helvetica,Arial, sans-serif;
+}
