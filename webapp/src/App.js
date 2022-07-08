@@ -2,8 +2,9 @@ import './App.css';
 import React, { useEffect, useState } from 'react';
 
 
-//const domain = ""
-const domain = "http://127.0.0.1:5000"
+const domain = ""
+// Enable for development
+//const domain = "http://127.0.0.1:5000"
 function getTrainExtraStyles(train) {
   switch(train) {
     case "2":
@@ -92,10 +93,7 @@ function App() {
         }).catch(error => {
           console.log(error)
         })
-
-
       }
-
     }, 10000)
   }, [])
 
@@ -108,7 +106,6 @@ function App() {
           <Subway train={item[0]}></Subway>
         </span>
         <span>
-
           {arrivals}
         </span>
 
