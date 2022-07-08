@@ -1,6 +1,8 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
 
+
+//const domain = ""
 const domain = "http://127.0.0.1:5000"
 function getTrainExtraStyles(train) {
   switch(train) {
@@ -66,25 +68,34 @@ function App() {
   const [getArrivals, setArrivals] = useState({})
 
   useEffect(()=>{
+      var requestInFlight = true;
       fetch(domain + '/arrivals').then(response => {
         console.log("SUCCESS", response)
         return response.json()
       }).then(actualData => {
         console.log(actualData)
+        requestInFlight = false
         setArrivals(actualData)
       }).catch(error => {
         console.log(error)
       })
     setInterval(() => {
-      fetch(domain + '/arrivals').then(response => {
-        console.log("SUCCESS", response)
-        return response.json()
-      }).then(actualData => {
-        console.log(actualData)
-        setArrivals(actualData)
-      }).catch(error => {
-        console.log(error)
-      })
+      if (!requestInFlight) {
+        requestInFlight = true
+        fetch(domain + '/arrivals').then(response => {
+          console.log("SUCCESS", response)
+          return response.json()
+        }).then(actualData => {
+          console.log(actualData)
+          requestInFlight = false
+          setArrivals(actualData)
+        }).catch(error => {
+          console.log(error)
+        })
+
+
+      }
+
     }, 10000)
   }, [])
 
