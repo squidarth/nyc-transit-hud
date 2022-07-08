@@ -82,7 +82,5 @@ def arrivals():
     for arrival in upcoming_arrivals:
         arrivals_by_route[str(arrival[2]) + str(arrival[1])].append(arrival[0])
         
-    print(arrivals_by_route.keys())
-
     next_three_arrivals = dict([(displayable_route(route), convert_times(sorted(arrivals)[:4])) for route, arrivals in arrivals_by_route.items()])
     return next_three_arrivals
