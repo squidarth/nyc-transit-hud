@@ -75,7 +75,7 @@ function App() {
         console.log(error)
       })
     setInterval(() => {
-      fetch('http://localhost:4333/arrivals').then(response => {
+      fetch('/arrivals').then(response => {
         console.log("SUCCESS", response)
         return response.json()
       }).then(actualData => {
