@@ -1,6 +1,7 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
 
+const domain = "http://127.0.0.1:5000"
 function getTrainExtraStyles(train) {
   switch(train) {
     case "2":
@@ -65,7 +66,7 @@ function App() {
   const [getArrivals, setArrivals] = useState({})
 
   useEffect(()=>{
-      fetch('/arrivals').then(response => {
+      fetch(domain + '/arrivals').then(response => {
         console.log("SUCCESS", response)
         return response.json()
       }).then(actualData => {
@@ -75,7 +76,7 @@ function App() {
         console.log(error)
       })
     setInterval(() => {
-      fetch('/arrivals').then(response => {
+      fetch(domain + '/arrivals').then(response => {
         console.log("SUCCESS", response)
         return response.json()
       }).then(actualData => {
