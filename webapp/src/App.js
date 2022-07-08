@@ -65,7 +65,7 @@ function App() {
   const [getArrivals, setArrivals] = useState({})
 
   useEffect(()=>{
-      fetch('http://localhost:4333/arrivals').then(response => {
+      fetch('/arrivals').then(response => {
         console.log("SUCCESS", response)
         return response.json()
       }).then(actualData => {
