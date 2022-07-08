@@ -84,7 +84,7 @@ function App() {
       }).catch(error => {
         console.log(error)
       })
-    }, 5000)
+    }, 10000)
   }, [])
 
   var content = <PendingDisplay></PendingDisplay>
