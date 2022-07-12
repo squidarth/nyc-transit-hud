@@ -74,33 +74,25 @@ function App() {
   const [getAlerts, setAlerts] = useState({})
 
   useEffect(()=>{
-      var requestInFlight = true;
-
-
       fetch(domain + '/arrivals').then(response => {
         console.log("SUCCESS", response)
         return response.json()
       }).then(actualData => {
         console.log(actualData)
-        requestInFlight = false
         setArrivals(actualData)
       }).catch(error => {
         console.log(error)
       })
     setInterval(() => {
-      if (!requestInFlight) {
-        requestInFlight = true
         fetch(domain + '/arrivals').then(response => {
           console.log("SUCCESS", response)
           return response.json()
         }).then(actualData => {
           console.log(actualData)
-          requestInFlight = false
           setArrivals(actualData)
         }).catch(error => {
           console.log(error)
         })
-      }
     }, 10000)
       fetch(domain + '/alerts').then(response => {
         console.log("SUCCESS", response)
