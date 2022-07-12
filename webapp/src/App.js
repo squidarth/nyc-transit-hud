@@ -42,7 +42,7 @@ function PendingDisplay() {
 
 function Alerts(props) {
   return props.alerts.alerts.map( alert =>
-    <p><span style={getTrainExtraStyles(alert[0])}className="train-styling">{alert[0]}</span>{alert[1]}</p>
+    <p key={alert}><span style={getTrainExtraStyles(alert[0])}className="train-styling">{alert[0]}</span>{alert[1]}</p>
   )
 }
 function Direction(props) {
