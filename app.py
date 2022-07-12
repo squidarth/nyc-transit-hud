@@ -95,7 +95,7 @@ def alerts():
 
     feed_json = feed.FromString(response.content)
     return {
-        "alerts": list(set([(translation.text, informed_entity.route_id) 
+        "alerts": list(set([(informed_entity.route_id, translation.text) 
           for  entity in feed_json.entity for informed_entity in entity.alert.informed_entity 
           for translation in entity.alert.header_text.translation if informed_entity.route_id
           in ["B", "D", "N", "Q", "R", "2", "3", "4", "5" ]]))

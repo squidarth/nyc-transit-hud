@@ -40,6 +40,11 @@ function PendingDisplay() {
   )
 }
 
+function Alerts(props) {
+  return props.alerts.alerts.map( alert =>
+    <p><span style={getTrainExtraStyles(alert[0])}className="train-styling">{alert[0]}</span>{alert[1]}</p>
+  )
+}
 function Direction(props) {
   var directionString = ""
   if (props.direction === "N") {
@@ -49,6 +54,8 @@ function Direction(props) {
   }
   return <span style={{marginRight: "10px", marginLeft: "10px", fontWeight: "bold"}}>{directionString}</span>
 }
+
+
 function Subway(props) {
   var fullTrainString = props.train;
 
@@ -64,9 +71,12 @@ function Subway(props) {
 
 function App() {
   const [getArrivals, setArrivals] = useState({})
+  const [getAlerts, setAlerts] = useState({})
 
   useEffect(()=>{
       var requestInFlight = true;
+
+
       fetch(domain + '/arrivals').then(response => {
         console.log("SUCCESS", response)
         return response.json()
@@ -92,11 +102,31 @@ function App() {
         })
       }
     }, 10000)
+      fetch(domain + '/alerts').then(response => {
+        console.log("SUCCESS", response)
+        return response.json()
+      }).then(actualData => {
+        console.log(actualData)
+        setAlerts(actualData)
+      }).catch(error => {
+        console.log(error)
+      })
+    setInterval(() => {
+        fetch(domain + '/alerts').then(response => {
+          console.log("SUCCESS", response)
+          return response.json()
+        }).then(actualData => {
+          console.log(actualData)
+          setAlerts(actualData)
+        }).catch(error => {
+          console.log(error)
+        })
+    }, 60000)
   }, [])
 
-  var content = <PendingDisplay></PendingDisplay>
+  var arrivalsContent = <PendingDisplay></PendingDisplay>
   if (Object.keys(getArrivals).length !== 0) {
-    content = Object.entries(getArrivals).map((item) => {
+    arrivalsContent = Object.entries(getArrivals).map((item) => {
       const arrivals = item[1].map((arrivalTime) => <span style={{marginLeft: "5px"}}>{arrivalTime[1]},  </span>)
       return <div className="subway-line">
         <span>
@@ -109,14 +139,22 @@ function App() {
         </div>
     })
   }
+
+  var alertsContent = <div></div>
+  if (Object.keys(getAlerts).length !== 0) {
+    alertsContent = <Alerts alerts={getAlerts}></Alerts>
+  }
   return (
     <div className="App">
-      <div>
+      <div className="arrivals">
           <h2>Next Arrivals at Atlantic Ave / Barclays Center</h2>
           <div className="content-block">
 
-            {content}
+            {arrivalsContent}
           </div>
+      </div>
+      <div className="alerts">
+        {alertsContent}
       </div>
     </div>
   );
