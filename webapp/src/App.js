@@ -29,9 +29,6 @@ function getTrainExtraStyles(train) {
       return {backgroundColor: "green"}
     default:
       return {}
-
-
-
   }
 }
 

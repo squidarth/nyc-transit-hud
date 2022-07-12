@@ -50,6 +50,7 @@ endpoints = [
     "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
 ]
 
+alerts_endpoint = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/camsys%2Fsubway-alerts"
 
 @app.route("/")
 def index():
@@ -84,3 +85,18 @@ def arrivals():
         
     next_three_arrivals = dict([(displayable_route(route), convert_times(sorted(arrivals)[:4])) for route, arrivals in arrivals_by_route.items()])
     return next_three_arrivals
+
+@app.route("/alerts")
+def alerts():
+    response = requests.get(
+        alerts_endpoint,
+        headers={"x-api-key": os.environ["MTA_API_KEY"] }
+    )
+
+    feed_json = feed.FromString(response.content)
+    return {
+        "alerts": list(set([(translation.text, informed_entity.route_id) 
+          for  entity in feed_json.entity for informed_entity in entity.alert.informed_entity 
+          for translation in entity.alert.header_text.translation if informed_entity.route_id
+          in ["B", "D", "N", "Q", "R", "2", "3", "4", "5" ]]))
+    }
