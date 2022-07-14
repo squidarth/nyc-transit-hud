@@ -42,8 +42,12 @@ def is_valid_time(provided_ts: int) -> str:
     return (parse_time(provided_ts) - datetime.datetime.now()).days >= 0 and (parse_time(provided_ts) - datetime.datetime.now()).seconds > 60
 
 atlantic_stops = stops_mapping["Atlantic Av-Barclays Ctr"]
+barclays_trains = ["B", "D", "N", "Q", "R", "2", "3", "4", "5" ]
 
 feed = gtfs_realtime_pb2.FeedMessage()
+
+# These are the endpoints for fetching all of the realtime
+# feeds for all of the trains at the barclays stop.
 endpoints = [
     "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs",
     "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw",
@@ -51,6 +55,7 @@ endpoints = [
 ]
 
 alerts_endpoint = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/camsys%2Fsubway-alerts"
+
 
 @app.route("/")
 def index():
@@ -67,9 +72,8 @@ def arrivals():
 
         feed_json = feed.FromString(response.content)
 
-        # Trip info: entity.trip_update.trip
-
-        # All of the stop times: entity.trip_update.stop_time_update 
+        # stop_time.update.stop_id[-1] gives the direction of the train, which
+        # is either "N" (Northbound) or "S" (Southbound).
         upcoming_arrivals += [(stop_time_update.arrival.time, stop_time_update.stop_id[-1], entity.trip_update.trip.route_id)
             for entity in feed_json.entity
             for stop_time_update 
@@ -77,14 +81,13 @@ def arrivals():
             if any([atlantic_stop in stop_time_update.stop_id for atlantic_stop in atlantic_stops]) and
              is_valid_time(stop_time_update.arrival.time) ]
 
-    # Get 3 Upcoming
-
     arrivals_by_route = defaultdict(list)
     for arrival in upcoming_arrivals:
+        # To form the full route, include the direction.
         arrivals_by_route[str(arrival[2]) + str(arrival[1])].append(arrival[0])
         
-    next_three_arrivals = dict([(displayable_route(route), convert_times(sorted(arrivals)[:4])) for route, arrivals in arrivals_by_route.items()])
-    return next_three_arrivals
+    next_arrivals = dict([(displayable_route(route), convert_times(sorted(arrivals)[:4])) for route, arrivals in arrivals_by_route.items()])
+    return next_arrivals
 
 @app.route("/alerts")
 def alerts():
@@ -97,6 +100,7 @@ def alerts():
     return {
         "alerts": sorted(list(set([(informed_entity.route_id, translation.text) 
           for  entity in feed_json.entity for informed_entity in entity.alert.informed_entity 
-          for translation in entity.alert.header_text.translation if informed_entity.route_id
-          in ["B", "D", "N", "Q", "R", "2", "3", "4", "5" ] and translation.language == "en"])), key=lambda item: item[0])
+          for translation in entity.alert.header_text.translation 
+          for active_period in entity.alert.active_period if informed_entity.route_id
+          in barclays_trains  and translation.language == "en" and active_period.end > datetime.datetime.now().timestamp()])), key=lambda item: item[0])
     }

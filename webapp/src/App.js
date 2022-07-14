@@ -1,10 +1,12 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
 
+var domain = "http://127.0.0.1:5000"
 
-const domain = ""
-// Enable for development
-//const domain = "http://127.0.0.1:5000"
+if (process.env.NODE_ENV === "production") {
+  domain = ""
+}
+
 function getTrainExtraStyles(train) {
   switch(train) {
     case "2":
@@ -17,11 +19,15 @@ function getTrainExtraStyles(train) {
       return {backgroundColor: "yellow", color: "black"}
     case "R":
       return {backgroundColor: "yellow", color: "black"}
+    case "W":
+      return {backgroundColor: "yellow", color: "black"}
     case "D":
       return {backgroundColor: "orange"}
     case "B":
       return {backgroundColor: "orange"}
     case "F":
+      return {backgroundColor: "orange"}
+    case "M":
       return {backgroundColor: "orange"}
     case "4":
       return {backgroundColor: "green"}
@@ -40,10 +46,18 @@ function PendingDisplay() {
   )
 }
 
+function TrainIndicator(props) {
+  return <span style={getTrainExtraStyles(props.train)}className="train-styling">{props.train}</span>
+}
+
 function Alerts(props) {
-  return props.alerts.alerts.map( alert =>
-    <p key={alert}><span style={getTrainExtraStyles(alert[0])}className="train-styling">{alert[0]}</span>{alert[1]}</p>
+  var alertsSection =  props.alerts.alerts.map( alert =>
+    <p key={alert}><TrainIndicator train={alert[0]} />{alert[1]}</p>
   )
+
+  return <div>
+    {alertsSection}
+  </div>
 }
 function Direction(props) {
   var directionString = ""
@@ -52,7 +66,7 @@ function Direction(props) {
   } else {
     directionString = "Southbound"
   }
-  return <span style={{marginRight: "10px", marginLeft: "10px", fontWeight: "bold"}}>{directionString}</span>
+  return <span className="direction" >{directionString}</span>
 }
 
 
@@ -63,63 +77,58 @@ function Subway(props) {
   var train = fullTrainString.slice(0, fullTrainString.length - 1)
   return (
     <span>
-      <span style={getTrainExtraStyles(train)}className="train-styling">{train}</span>
+      <TrainIndicator train={train} />
       <Direction direction={direction}></Direction>
     </span>
   )
 }
 
+
+
 function App() {
   const [getArrivals, setArrivals] = useState({})
   const [getAlerts, setAlerts] = useState({})
 
+  function fetchArrivals() {
+    fetch(domain + '/arrivals').then(response => {
+      console.log("SUCCESS", response)
+      return response.json()
+    }).then(actualData => {
+      console.log(actualData)
+      setArrivals(actualData)
+    }).catch(error => {
+      console.log(error)
+    })
+  }
+
+  function fetchAlerts() {
+    fetch(domain + '/alerts').then(response => {
+      console.log("SUCCESS", response)
+      return response.json()
+    }).then(actualData => {
+      console.log(actualData)
+      setAlerts(actualData)
+    }).catch(error => {
+      console.log(error)
+    })
+  }
+
   useEffect(()=>{
-      fetch(domain + '/arrivals').then(response => {
-        console.log("SUCCESS", response)
-        return response.json()
-      }).then(actualData => {
-        console.log(actualData)
-        setArrivals(actualData)
-      }).catch(error => {
-        console.log(error)
-      })
+    fetchArrivals() 
     setInterval(() => {
-        fetch(domain + '/arrivals').then(response => {
-          console.log("SUCCESS", response)
-          return response.json()
-        }).then(actualData => {
-          console.log(actualData)
-          setArrivals(actualData)
-        }).catch(error => {
-          console.log(error)
-        })
+      fetchArrivals()
     }, 10000)
-      fetch(domain + '/alerts').then(response => {
-        console.log("SUCCESS", response)
-        return response.json()
-      }).then(actualData => {
-        console.log(actualData)
-        setAlerts(actualData)
-      }).catch(error => {
-        console.log(error)
-      })
+
+    fetchAlerts()
     setInterval(() => {
-        fetch(domain + '/alerts').then(response => {
-          console.log("SUCCESS", response)
-          return response.json()
-        }).then(actualData => {
-          console.log(actualData)
-          setAlerts(actualData)
-        }).catch(error => {
-          console.log(error)
-        })
+      fetchAlerts()
     }, 60000)
   }, [])
 
   var arrivalsContent = <PendingDisplay></PendingDisplay>
   if (Object.keys(getArrivals).length !== 0) {
     arrivalsContent = Object.entries(getArrivals).map((item) => {
-      const arrivals = item[1].map((arrivalTime) => <span style={{marginLeft: "5px"}}>{arrivalTime[1]},  </span>)
+      const arrivals = item[1].map((arrivalTime) => <span className="individual-arrival">{arrivalTime[1]},  </span>)
       return <div className="subway-line">
         <span>
           <Subway train={item[0]}></Subway>
@@ -127,8 +136,7 @@ function App() {
         <span>
           {arrivals}
         </span>
-
-        </div>
+      </div>
     })
   }
 

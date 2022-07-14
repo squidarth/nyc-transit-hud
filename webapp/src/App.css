@@ -17,3 +17,12 @@
 .content-block {
   font-size: 1.3em;
 }
+
+.individual-arrival {
+  margin-left: 5px
+}
+
+.direction {
+  font-weight: bold;
+  margin: 0px 10px 0px 10px;
+}
