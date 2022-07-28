@@ -11,6 +11,8 @@ from typing import List, Tuple
 app = Flask(__name__, static_url_path='', static_folder='webapp/build')
 CORS(app)
 
+feed = gtfs_realtime_pb2.FeedMessage()
+
 routes_mapping = {}
 with open("routes.txt") as routes_csv:
     routes_reader = csv.reader(routes_csv, delimiter=',')
@@ -41,13 +43,12 @@ def convert_times(provided_arrivals: List[int]) -> List[str]:
 def is_valid_time(provided_ts: int) -> str:
     return (parse_time(provided_ts) - datetime.datetime.now()).days >= 0 and (parse_time(provided_ts) - datetime.datetime.now()).seconds > 60
 
-atlantic_stops = stops_mapping["Atlantic Av-Barclays Ctr"]
-barclays_trains = ["B", "D", "N", "Q", "R", "2", "3", "4", "5" ]
-
-feed = gtfs_realtime_pb2.FeedMessage()
+# TODO: Don't hardcode this, allow these to be passed in query params
+relevant_stops = stops_mapping["Atlantic Av-Barclays Ctr"]
+trains_for_alerts = ["B", "D", "N", "Q", "R", "2", "3", "4", "5" ]
 
 # These are the endpoints for fetching all of the realtime
-# feeds for all of the trains at the barclays stop.
+# feeds for all of the trains.
 endpoints = [
     "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs",
     "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw",
@@ -78,7 +79,7 @@ def arrivals():
             for entity in feed_json.entity
             for stop_time_update 
             in entity.trip_update.stop_time_update
-            if any([atlantic_stop in stop_time_update.stop_id for atlantic_stop in atlantic_stops]) and
+            if any([stop in stop_time_update.stop_id for stop in relevant_stops]) and
              is_valid_time(stop_time_update.arrival.time) ]
 
     arrivals_by_route = defaultdict(list)
@@ -102,5 +103,5 @@ def alerts():
           for  entity in feed_json.entity for informed_entity in entity.alert.informed_entity 
           for translation in entity.alert.header_text.translation 
           for active_period in entity.alert.active_period if informed_entity.route_id
-          in barclays_trains  and translation.language == "en" and active_period.end > datetime.datetime.now().timestamp()])), key=lambda item: item[0])
+          in trains_for_alerts  and translation.language == "en" and active_period.end > datetime.datetime.now().timestamp()])), key=lambda item: item[0])
     }
